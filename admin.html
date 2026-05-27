@@ -7,24 +7,24 @@
     <link rel="stylesheet" href="/css/main.css">
     <style>
         .admin-tabs { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
-        .tab-btn-admin { background: rgba(124, 58, 237, 0.2); border: none; padding: 0.7rem 1.5rem; border-radius: 25px; cursor: pointer; color: #c4b5fd; font-weight: 600; }
-        .tab-btn-admin.active { background: linear-gradient(135deg, #7c3aed, #6d28d9); color: white; }
+        .tab-btn-admin { background: rgba(99, 102, 241, 0.2); border: none; padding: 0.7rem 1.5rem; border-radius: 25px; cursor: pointer; color: #c4b5fd; font-weight: 600; }
+        .tab-btn-admin.active { background: linear-gradient(135deg, #6366f1, #4c3b9e); color: white; }
         .admin-panel { display: none; }
         .admin-panel.active { display: block; }
         .admin-table { width: 100%; border-collapse: collapse; background: rgba(0, 0, 0, 0.3); border-radius: 15px; overflow: hidden; }
-        .admin-table th, .admin-table td { padding: 0.8rem; text-align: left; border-bottom: 1px solid #7c3aed; vertical-align: middle; }
-        .admin-table th { background: #2d1b4e; color: #a78bfa; }
-        .avatar-small { width: 32px; height: 32px; border-radius: 50%; vertical-align: middle; background: #2d1b4e; }
-        .role-select { padding: 0.3rem 0.6rem; border-radius: 20px; border: 1px solid #7c3aed; background: #1a0a2e; color: #c4b5fd; cursor: pointer; }
+        .admin-table th, .admin-table td { padding: 0.8rem; text-align: left; border-bottom: 1px solid #4c3b9e; vertical-align: middle; }
+        .admin-table th { background: #1a1a4e; color: #8b5cf6; }
+        .avatar-small { width: 32px; height: 32px; border-radius: 50%; vertical-align: middle; }
+        .role-select { padding: 0.3rem 0.6rem; border-radius: 20px; border: 1px solid #4c3b9e; background: #0f0c2e; color: #c4b5fd; cursor: pointer; }
         .btn-danger-small { background: #dc2626; border: none; padding: 0.3rem 0.6rem; border-radius: 15px; cursor: pointer; color: white; }
         .news-card { background: rgba(0, 0, 0, 0.3); border-radius: 15px; padding: 1rem; margin-bottom: 1rem; }
         .news-title { font-size: 1.2rem; color: #c4b5fd; margin-bottom: 0.5rem; }
-        .news-meta { font-size: 0.8rem; color: #a78bfa; margin-bottom: 0.5rem; }
+        .news-meta { font-size: 0.8rem; color: #8b5cf6; margin-bottom: 0.5rem; }
         .news-form { background: rgba(0, 0, 0, 0.2); padding: 1.5rem; border-radius: 15px; margin-bottom: 2rem; }
         .form-group { margin-bottom: 1rem; }
-        .form-group label { display: block; margin-bottom: 0.3rem; color: #a78bfa; }
-        .form-control { width: 100%; padding: 0.5rem; border-radius: 8px; border: 1px solid #7c3aed; background: rgba(0,0,0,0.3); color: white; }
-        .btn { background: linear-gradient(135deg, #7c3aed, #6d28d9); color: white; border: none; padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; }
+        .form-group label { display: block; margin-bottom: 0.3rem; color: #8b5cf6; }
+        .form-control { width: 100%; padding: 0.5rem; border-radius: 8px; border: 1px solid #4c3b9e; background: rgba(0,0,0,0.3); color: white; }
+        .btn { background: linear-gradient(135deg, #6366f1, #4c3b9e); color: white; border: none; padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -40,13 +40,13 @@
                 <table class="admin-table">
                     <thead><tr><th>Аватар</th><th>Логин</th><th>Email</th><th>Роль</th><th>Действия</th></tr></thead>
                     <tbody id="usersTableBody"></tbody>
-                </table>
+                漓
             </div>
             <div id="newsPanel" class="admin-panel">
                 <div class="news-form">
                     <h3>Создать новость</h3>
-                    <div class="form-group"><label>Заголовок</label><input type="text" id="newsTitle" class="form-control" placeholder="Введите заголовок"></div>
-                    <div class="form-group"><label>Текст (можно использовать HTML)</label><textarea id="newsText" rows="6" class="form-control" placeholder="Введите текст новости..."></textarea></div>
+                    <div class="form-group"><label>Заголовок</label><input type="text" id="newsTitle" class="form-control"></div>
+                    <div class="form-group"><label>Текст</label><textarea id="newsText" rows="6" class="form-control"></textarea></div>
                     <button class="btn" id="publishBtn">Опубликовать</button>
                 </div>
                 <h3>Существующие новости</h3>
@@ -57,16 +57,12 @@
     <script type="module">
         import { auth, db } from './js/firebase-config.js';
         import { collection, getDocs, doc, updateDoc, deleteDoc, addDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { loadNavigation, requireAdmin } from './js/common.js';
+        import { loadNavigation, requireAdmin, getAvatarUrl, settings } from './js/common.js';
         
         await loadNavigation();
         await requireAdmin();
         
         let allUsers = [];
-        
-        function getAvatarUrl(username) {
-            return `https://api.dicebear.com/9.x/micah/svg?seed=${encodeURIComponent(username)}&backgroundColor=7c3aed,a78bfa,4c1d95,8b5cf6,c4b5fd&radius=50&size=32`;
-        }
         
         async function loadUsers() {
             const snapshot = await getDocs(collection(db, "players"));
@@ -74,13 +70,13 @@
             snapshot.forEach(doc => allUsers.push({ id: doc.id, ...doc.data(), role: doc.data().role || 'player' }));
             const tbody = document.getElementById('usersTableBody');
             if (!tbody) return;
-            if (allUsers.length === 0) { tbody.innerHTML = '<tr><td colspan="5">Нет пользователей</td></tr>'; return; }
+            if (allUsers.length === 0) { tbody.innerHTML = '<tr><td colspan="5">Нет пользователей</td>' + '</tr>'; return; }
             tbody.innerHTML = allUsers.map(user => {
                 const isCurrentUser = auth.currentUser?.uid === user.id;
-                const avatarUrl = getAvatarUrl(user.username || user.id);
+                const avatarUrl = getAvatarUrl(user.username || user.id, 32);
                 return `
                     <tr>
-                        <td><img src="${avatarUrl}" class="avatar-small" alt="avatar" onerror="this.src='https://placehold.co/32x32/7c3aed/white?text=?'"></td>
+                        <td><img src="${avatarUrl}" class="avatar-small" onerror="this.src='${settings?.avatars?.fallbackImage}'"></td>
                         <td>${user.username || 'Без имени'}</td>
                         <td>${user.email || '-'}</td>
                         <td><select class="role-select" data-user-id="${user.id}" ${isCurrentUser ? 'disabled' : ''}>
@@ -122,53 +118,45 @@
                 for (const docSnap of snapshot.docs) {
                     const news = docSnap.data();
                     const date = news.createdAt ? new Date(news.createdAt).toLocaleDateString('ru-RU') : 'Дата неизвестна';
-                    const authorName = news.authorName || 'Админ';
-                    html += `<div class="news-card"><div class="news-title">${news.title}</div><div class="news-meta">${date} | ${authorName}</div><div>${news.fullText.substring(0, 100)}...</div><button class="btn-danger-small" onclick="deleteNews('${docSnap.id}')" style="margin-top:0.5rem">Удалить</button></div>`;
+                    html += `<div class="news-card"><div class="news-title">${news.title}</div><div class="news-meta">${date} | ${news.authorName || 'Админ'}</div><div>${news.fullText.substring(0, 100)}...</div><button class="btn-danger-small" onclick="deleteNews('${docSnap.id}')">Удалить</button></div>`;
                 }
                 container.innerHTML = html;
-            } catch (error) { console.error('Ошибка:', error); container.innerHTML = '<div class="message error">Ошибка загрузки новостей</div>'; }
+            } catch (error) { console.error(error); container.innerHTML = '<div class="empty-state">Ошибка загрузки</div>'; }
         }
         
         window.createNews = async () => {
             const title = document.getElementById('newsTitle').value.trim();
             const fullText = document.getElementById('newsText').value.trim();
-            if (!title) { alert('Введите заголовок'); return; }
-            if (!fullText) { alert('Введите текст'); return; }
-            const currentUser = auth.currentUser;
-            if (!currentUser) { alert('Не авторизован'); return; }
-            try {
-                await addDoc(collection(db, "news"), {
-                    title: title, fullText: fullText, createdAt: new Date().toISOString(),
-                    authorId: currentUser.uid, authorName: document.getElementById('username-span')?.textContent || 'Админ'
-                });
-                document.getElementById('newsTitle').value = '';
-                document.getElementById('newsText').value = '';
-                await loadNews();
-                alert('Новость опубликована!');
-            } catch (error) { console.error('Ошибка:', error); alert('Ошибка: ' + error.message); }
+            if (!title || !fullText) { alert('Заполните поля'); return; }
+            await addDoc(collection(db, "news"), {
+                title, fullText, createdAt: new Date().toISOString(),
+                authorId: auth.currentUser?.uid, authorName: document.getElementById('username-span')?.textContent || 'Админ'
+            });
+            document.getElementById('newsTitle').value = '';
+            document.getElementById('newsText').value = '';
+            await loadNews();
+            alert('Новость опубликована');
         };
         
         window.deleteNews = async (newsId) => {
-            if (confirm('Удалить новость?')) {
-                await deleteDoc(doc(db, "news", newsId));
-                await loadNews();
-            }
+            if (confirm('Удалить новость?')) { await deleteDoc(doc(db, "news", newsId)); await loadNews(); }
         };
         
-        document.getElementById('usersTab').addEventListener('click', () => {
+        document.getElementById('usersTab').onclick = () => {
             document.getElementById('usersTab').classList.add('active');
             document.getElementById('newsTab').classList.remove('active');
             document.getElementById('usersPanel').classList.add('active');
             document.getElementById('newsPanel').classList.remove('active');
-        });
-        document.getElementById('newsTab').addEventListener('click', async () => {
+        };
+        document.getElementById('newsTab').onclick = async () => {
             document.getElementById('newsTab').classList.add('active');
             document.getElementById('usersTab').classList.remove('active');
             document.getElementById('newsPanel').classList.add('active');
             document.getElementById('usersPanel').classList.remove('active');
             await loadNews();
-        });
-        document.getElementById('publishBtn').addEventListener('click', () => window.createNews());
+        };
+        document.getElementById('publishBtn').onclick = () => window.createNews();
+        
         await loadUsers();
     </script>
 </body>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сообщество - DnD Картакар</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <style>
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .user-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 1.2rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .user-card:hover {
+            transform: translateY(-3px);
+            background: rgba(0, 0, 0, 0.4);
+        }
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 0.8rem;
+            display: block;
+        }
+        .user-name {
+            font-size: 1.1rem;
+            color: #c4b5fd;
+            margin-bottom: 0.3rem;
+        }
+        .user-role {
+            font-size: 0.8rem;
+            color: #8b5cf6;
+        }
+        .user-quote {
+            font-size: 0.8rem;
+            color: #a78bfa;
+            font-style: italic;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div id="nav-placeholder"></div>
+    <div class="container">
+        <div class="card">
+            <h1>Сообщество</h1>
+            <p>Все искатели приключений</p>
+            <div id="usersList" class="users-grid"><div class="empty-state">Загрузка...</div></div>
+        </div>
+    </div>
+    <script type="module">
+        import { db } from './js/firebase-config.js';
+        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { loadNavigation, getAvatarUrl, getRoleName, settings } from './js/common.js';
+        
+        await loadNavigation();
+        
+        async function loadUsers() {
+            const container = document.getElementById('usersList');
+            const snapshot = await getDocs(collection(db, "players"));
+            
+            if (snapshot.empty) {
+                container.innerHTML = '<div class="empty-state">Пользователей пока нет</div>';
+                return;
+            }
+            
+            let html = '';
+            for (const docSnap of snapshot.docs) {
+                const user = docSnap.data();
+                const username = user.username || 'Без имени';
+                const role = getRoleName(user.role);
+                const quote = user.quote || '';
+                const avatarUrl = getAvatarUrl(username, 80);
+                
+                html += `
+                    <div class="user-card">
+                        <img src="${avatarUrl}" class="user-avatar" onerror="this.src='${settings?.avatars?.fallbackImage}'">
+                        <div class="user-name">
+                            <a href="/profile-page.html?id=${docSnap.id}" style="color: #c4b5fd; text-decoration: none;">${username}</a>
+                        </div>
+                        <div class="user-role">${role}</div>
+                        ${quote ? `<div class="user-quote">"${quote.substring(0, 60)}${quote.length > 60 ? '...' : ''}"</div>` : ''}
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+        
+        loadUsers();
+    </script>
+</body>
+</html>

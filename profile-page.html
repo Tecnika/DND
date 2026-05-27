@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Моя страница - DnD Картакар</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <style>
+        .edit-quote-btn {
+            background: #4c3b9e;
+            border: none;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            cursor: pointer;
+            color: white;
+            font-size: 0.7rem;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+        .edit-quote-btn:hover { background: #6366f1; }
+        .quote-container {
+            background: linear-gradient(135deg, rgba(76, 59, 158, 0.3), rgba(99, 102, 241, 0.2));
+            border-left: 4px solid #8b5cf6;
+            border-radius: 16px;
+            padding: 1.2rem;
+            margin-top: 0.5rem;
+            position: relative;
+        }
+        .quote-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1rem;
+            font-style: italic;
+            color: #c4b5fd;
+            line-height: 1.5;
+        }
+        .quote-text::before { content: "«"; font-size: 1.5rem; color: #8b5cf6; opacity: 0.7; }
+        .quote-text::after { content: "»"; font-size: 1.5rem; color: #8b5cf6; opacity: 0.7; vertical-align: bottom; }
+        .quote-edit {
+            width: 100%;
+            min-height: 80px;
+            padding: 0.8rem;
+            border-radius: 12px;
+            border: 1px solid #4c3b9e;
+            background: rgba(0, 0, 0, 0.4);
+            color: #d4e0ff;
+            font-family: 'Playfair Display', serif;
+            font-size: 0.95rem;
+            resize: vertical;
+        }
+        .quote-save-btn { background: #22c55e; margin-top: 0.5rem; margin-right: 0.5rem; }
+        .quote-cancel-btn { background: #6b7280; margin-top: 0.5rem; }
+        .edit-mode .quote-text { display: none; }
+        .edit-mode .quote-edit-area { display: block; }
+        .quote-edit-area { display: none; }
+        .public-quote {
+            background: linear-gradient(135deg, rgba(76, 59, 158, 0.2), rgba(99, 102, 241, 0.1));
+            border-left: 4px solid #8b5cf6;
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .public-quote-label {
+            font-size: 0.7rem;
+            color: #8b5cf6;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+        }
+        .public-quote-text {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            color: #c4b5fd;
+            line-height: 1.5;
+        }
+        .public-quote-text::before { content: "«"; font-size: 1.2rem; color: #8b5cf6; }
+        .public-quote-text::after { content: "»"; font-size: 1.2rem; color: #8b5cf6; vertical-align: bottom; }
+        .empty-quote { color: #6b7280; font-style: italic; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div id="nav-placeholder"></div>
+    <div class="container">
+        <div id="profileContent" class="profile-container"><div class="empty-state">Загрузка...</div></div>
+    </div>
+    <script type="module">
+        import { auth, db } from './js/firebase-config.js';
+        import { doc, getDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { loadNavigation, getAvatarUrl, getRoleName, settings } from './js/common.js';
+        
+        await loadNavigation();
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('id');
+        const currentUserId = auth.currentUser?.uid;
+        const isOwnProfile = userId === currentUserId;
+        
+        if (!userId) {
+            document.getElementById('profileContent').innerHTML = '<div class="empty-state">Не указан ID пользователя</div>';
+        } else {
+            try {
+                const userDoc = await getDoc(doc(db, "players", userId));
+                
+                if (!userDoc.exists()) {
+                    document.getElementById('profileContent').innerHTML = '<div class="empty-state">Пользователь не найден</div>';
+                } else {
+                    const userData = userDoc.data();
+                    const username = userData.username || 'Без имени';
+                    const role = getRoleName(userData.role);
+                    const regDate = userData.createdAt ? new Date(userData.createdAt).toLocaleDateString('ru-RU') : 'Неизвестно';
+                    const quote = userData.quote || '';
+                    
+                    const avatarUrl = getAvatarUrl(username, 150);
+                    
+                    let quoteHtml = '';
+                    if (isOwnProfile) {
+                        const displayQuote = quote || 'Напишите свою цитату...';
+                        quoteHtml = `
+                            <div id="quoteContainer" class="quote-container">
+                                <div id="quoteDisplay" class="quote-text">${displayQuote}</div>
+                                <div class="quote-edit-area">
+                                    <textarea id="quoteEdit" class="quote-edit" rows="3" placeholder="Введите вашу цитату...">${quote}</textarea>
+                                    <div>
+                                        <button class="btn quote-save-btn" onclick="saveQuote()">Сохранить</button>
+                                        <button class="btn quote-cancel-btn" onclick="cancelQuoteEdit()">Отмена</button>
+                                    </div>
+                                </div>
+                                <button class="edit-quote-btn" onclick="toggleQuoteEdit()">✏️ Редактировать цитату</button>
+                            </div>
+                        `;
+                    } else {
+                        quoteHtml = quote ? `
+                            <div class="public-quote">
+                                <div class="public-quote-label">Цитата</div>
+                                <div class="public-quote-text">${quote}</div>
+                            </div>
+                        ` : `
+                            <div class="public-quote">
+                                <div class="public-quote-label">Цитата</div>
+                                <div class="empty-quote">Пользователь пока не добавил цитату</div>
+                            </div>
+                        `;
+                    }
+                    
+                    const profileHTML = `
+                        <div class="profile-sidebar">
+                            <img src="${avatarUrl}" alt="Avatar" class="avatar-img" onerror="this.src='${settings?.avatars?.fallbackImage}'">
+                            <div class="profile-info">
+                                <p><span class="profile-label">Логин:</span> ${username}</p>
+                                <p><span class="profile-label">Роль:</span> ${role}</p>
+                                <p><span class="profile-label">На сайте с:</span> ${regDate}</p>
+                            </div>
+                        </div>
+                        <div class="profile-content">
+                            <h2>Цитата</h2>
+                            ${quoteHtml}
+                            <h2 style="margin-top: 1.5rem;">Персонажи</h2>
+                            <div id="charactersList" class="grid"><div class="empty-state">Загрузка персонажей...</div></div>
+                        </div>
+                    `;
+                    document.getElementById('profileContent').innerHTML = profileHTML;
+                    
+                    const q = query(collection(db, "characters"), where("uid", "==", userId));
+                    const snapshot = await getDocs(q);
+                    const container = document.getElementById('charactersList');
+                    
+                    if (snapshot.empty) {
+                        container.innerHTML = '<div class="empty-state">У пользователя нет персонажей</div>';
+                    } else {
+                        let charsHtml = '';
+                        snapshot.forEach(docSnap => {
+                            const char = docSnap.data();
+                            charsHtml += `<div class="game-card"><h3>${char.name}</h3><p>${char.race || '?'} | ${char.class || '?'} | Уровень ${char.level || 1}</p></div>`;
+                        });
+                        container.innerHTML = charsHtml;
+                    }
+                    
+                    window.toggleQuoteEdit = () => { document.getElementById('quoteContainer').classList.add('edit-mode'); };
+                    window.saveQuote = async () => {
+                        const newQuote = document.getElementById('quoteEdit').value.trim();
+                        await updateDoc(doc(db, "players", userId), { quote: newQuote });
+                        document.getElementById('quoteDisplay').innerHTML = newQuote || 'Напишите свою цитату...';
+                        document.getElementById('quoteContainer').classList.remove('edit-mode');
+                        alert('Цитата сохранена!');
+                    };
+                    window.cancelQuoteEdit = () => {
+                        document.getElementById('quoteContainer').classList.remove('edit-mode');
+                        document.getElementById('quoteEdit').value = quote;
+                    };
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                document.getElementById('profileContent').innerHTML = '<div class="empty-state">Ошибка загрузки профиля</div>';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -5,61 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DnD Картакар</title>
     <link rel="stylesheet" href="/css/main.css">
-    <style>
-        .news-card {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 20px;
-            padding: 1.2rem;
-            margin-bottom: 1rem;
-        }
-        .news-title { font-size: 1.3rem; color: #c4b5fd; margin-bottom: 0.5rem; }
-        .news-meta { font-size: 0.8rem; color: #a78bfa; margin-bottom: 1rem; }
-        .news-meta a { color: #ffaa00; text-decoration: underline; }
-        .news-meta a:hover { color: #ffcc44; }
-        .news-short { color: #d4c5e8; line-height: 1.5; }
-        .news-full { display: none; margin-top: 1rem; line-height: 1.6; }
-        .news-card.expanded .news-full { display: block; }
-        .news-card.expanded .news-short { display: none; }
-        .read-more {
-            background: none;
-            border: none;
-            color: #a78bfa;
-            cursor: pointer;
-            margin-top: 0.5rem;
-        }
-        .debug-panel {
-            background: #1a0a2e;
-            border: 1px solid #7c3aed;
-            border-radius: 10px;
-            padding: 1rem;
-            margin-top: 1rem;
-            font-family: monospace;
-            font-size: 0.8rem;
-            max-height: 250px;
-            overflow: auto;
-        }
-        .debug-panel h4 { color: #ffaa00; margin-bottom: 0.5rem; }
-        .debug-log { color: #86efac; }
-        .debug-error { color: #fca5a5; }
-        .debug-warning { color: #fde047; }
-    </style>
 </head>
 <body>
     <div id="nav-placeholder"></div>
     <div class="container">
         <div class="card">
             <div class="grid" style="grid-template-columns: repeat(2, 1fr);">
-                <div class="game-card"><h3>Мои игры</h3><p>Ваши персонажи и приключения</p><a href="/profile.html" class="btn">Перейти</a></div>
-                <div class="game-card"><h3>Лор мира</h3><p>История и легенды</p><a href="/lore.html" class="btn">Изучить</a></div>
+                <div class="game-card">
+                    <h3>Лор мира</h3>
+                    <p>История и легенды</p>
+                    <a href="/lore.html" class="btn">Изучить</a>
+                </div>
+                <div class="game-card">
+                    <h3>Сообщество</h3>
+                    <p>Встречайте других искателей приключений</p>
+                    <a href="/user.html" class="btn">К сообществу</a>
+                </div>
             </div>
         </div>
         <div class="card">
             <h1>Новости мира</h1>
-            <div id="newsList" class="news-grid"><div class="empty-state">Загрузка...</div></div>
-        </div>
-        <div class="debug-panel">
-            <h4>📋 Лог загрузки новостей</h4>
-            <div id="debugLog"></div>
+            <div id="newsList"><div class="empty-state">Загрузка...</div></div>
         </div>
     </div>
     <script type="module">
@@ -69,84 +35,41 @@
         
         loadNavigation();
         
-        function addDebugLog(message, type = 'log') {
-            const debugDiv = document.getElementById('debugLog');
-            const time = new Date().toLocaleTimeString();
-            let colorClass = 'debug-log';
-            if (type === 'error') colorClass = 'debug-error';
-            if (type === 'warning') colorClass = 'debug-warning';
-            debugDiv.innerHTML += `<div class="${colorClass}">[${time}] ${message}</div>`;
-            debugDiv.scrollTop = debugDiv.scrollHeight;
-            console.log(message);
-        }
-        
         async function loadNews() {
-            addDebugLog('Начинаем загрузку новостей...');
             const container = document.getElementById('newsList');
+            const q = query(collection(db, "news"), orderBy("createdAt", "desc"));
+            const snapshot = await getDocs(q);
             
-            try {
-                const q = query(collection(db, "news"), orderBy("createdAt", "desc"));
-                const snapshot = await getDocs(q);
-                
-                addDebugLog(`Получено новостей: ${snapshot.size}`);
-                
-                if (snapshot.empty) {
-                    container.innerHTML = '<div class="empty-state">Новостей пока нет</div>';
-                    addDebugLog('Новостей нет');
-                    return;
-                }
-                
-                let html = '';
-                let newsCount = 0;
-                
-                for (const docSnap of snapshot.docs) {
-                    newsCount++;
-                    const news = docSnap.data();
-                    addDebugLog(`--- Новость ${newsCount}: "${news.title}" ---`);
-                    addDebugLog(`  authorId: ${news.authorId || 'ОТСУТСТВУЕТ'}`);
-                    addDebugLog(`  authorName: ${news.authorName || 'ОТСУТСТВУЕТ'}`);
-                    
-                    const shortText = news.fullText.substring(0, 200) + (news.fullText.length > 200 ? '...' : '');
-                    const date = news.createdAt ? new Date(news.createdAt).toLocaleDateString('ru-RU') : 'Дата неизвестна';
-                    
-                    let authorDisplay = news.authorName || 'Админ';
-                    
-                    if (news.authorId) {
-                        addDebugLog(`  Ищем пользователя по ID: ${news.authorId}`);
-                        try {
-                            const userDoc = await getDoc(doc(db, "players", news.authorId));
-                            if (userDoc.exists()) {
-                                const username = userDoc.data().username;
-                                authorDisplay = `<a href="/user.html?id=${news.authorId}" style="color: #ffaa00; text-decoration: underline;">${username}</a>`;
-                                addDebugLog(`  Найден пользователь: ${username}, ссылка создана`);
-                            } else {
-                                addDebugLog(`  Пользователь с ID ${news.authorId} не найден`, 'error');
-                            }
-                        } catch (err) {
-                            addDebugLog(`  Ошибка: ${err.message}`, 'error');
-                        }
-                    } else {
-                        addDebugLog(`  Нет authorId, ссылка не будет создана`, 'warning');
-                    }
-                    
-                    html += `
-                        <div class="news-card">
-                            <div class="news-title">📰 ${news.title}</div>
-                            <div class="news-meta">📅 ${date} | ✍️ ${authorDisplay}</div>
-                            <div class="news-short">${shortText}</div>
-                            <div class="news-full">${news.fullText}</div>
-                            <button class="read-more" onclick="toggleNews(this)">Читать далее</button>
-                        </div>
-                    `;
-                }
-                
-                container.innerHTML = html;
-                addDebugLog(`Загружено ${newsCount} новостей`);
-                
-            } catch (error) {
-                addDebugLog(`ОШИБКА: ${error.message}`, 'error');
-                container.innerHTML = '<div class="empty-state">Ошибка загрузки новостей</div>';
+            if (snapshot.empty) {
+                container.innerHTML = '<div class="empty-state">Новостей пока нет</div>';
+                return;
             }
+            
+            let html = '';
+            for (const docSnap of snapshot.docs) {
+                const news = docSnap.data();
+                const shortText = news.fullText.substring(0, 200) + (news.fullText.length > 200 ? '...' : '');
+                const date = news.createdAt ? new Date(news.createdAt).toLocaleDateString('ru-RU') : 'Дата неизвестна';
+                
+                let authorDisplay = news.authorName || 'Админ';
+                if (news.authorId) {
+                    const userDoc = await getDoc(doc(db, "players", news.authorId));
+                    if (userDoc.exists()) {
+                        authorDisplay = `<a href="/profile-page.html?id=${news.authorId}">${userDoc.data().username}</a>`;
+                    }
+                }
+                
+                html += `
+                    <div class="news-card">
+                        <div class="news-title">📰 ${news.title}</div>
+                        <div class="news-meta">📅 ${date} | ✍️ ${authorDisplay}</div>
+                        <div class="news-short">${shortText}</div>
+                        <div class="news-full">${news.fullText}</div>
+                        <button class="read-more" onclick="toggleNews(this)">Читать далее</button>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
         }
         
         window.toggleNews = (btn) => {

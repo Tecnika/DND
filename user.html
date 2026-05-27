@@ -6,16 +6,29 @@
     <title>Профиль пользователя - DnD Картакар</title>
     <link rel="stylesheet" href="/css/main.css">
     <style>
-        .profile-container { display: grid; grid-template-columns: 300px 1fr; gap: 1.5rem; }
-        .profile-sidebar { background: rgba(45, 27, 78, 0.85); border-radius: 25px; padding: 1.5rem; text-align: center; }
-        .avatar-img { width: 150px; height: 150px; border-radius: 50%; margin: 0 auto 1rem; display: block; background: #2d1b4e; object-fit: cover; }
-        .profile-info p { margin: 0.5rem 0; }
-        .profile-label { color: #a78bfa; font-weight: 600; }
-        .profile-content { background: rgba(45, 27, 78, 0.85); border-radius: 25px; padding: 1.5rem; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-top: 1rem; }
-        .game-card { background: rgba(0, 0, 0, 0.3); border-radius: 15px; padding: 1rem; border-left: 3px solid #7c3aed; }
-        .empty-state { text-align: center; padding: 2rem; color: #a78bfa; }
-        @media (max-width: 768px) { .profile-container { grid-template-columns: 1fr; } }
+        .public-quote {
+            background: linear-gradient(135deg, rgba(76, 59, 158, 0.2), rgba(99, 102, 241, 0.1));
+            border-left: 4px solid #8b5cf6;
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .public-quote-label {
+            font-size: 0.7rem;
+            color: #8b5cf6;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+        }
+        .public-quote-text {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            color: #c4b5fd;
+            line-height: 1.5;
+        }
+        .public-quote-text::before { content: "«"; font-size: 1.2rem; color: #8b5cf6; }
+        .public-quote-text::after { content: "»"; font-size: 1.2rem; color: #8b5cf6; vertical-align: bottom; }
+        .empty-quote { color: #6b7280; font-style: italic; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -26,9 +39,10 @@
     <script type="module">
         import { db } from './js/firebase-config.js';
         import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { loadNavigation } from './js/common.js';
+        import { loadNavigation, getAvatarUrl, getRoleName, settings } from './js/common.js';
         
         await loadNavigation();
+        
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('id');
         
@@ -37,19 +51,33 @@
         } else {
             try {
                 const userDoc = await getDoc(doc(db, "players", userId));
+                
                 if (!userDoc.exists()) {
                     document.getElementById('profileContent').innerHTML = '<div class="empty-state">Пользователь не найден</div>';
                 } else {
                     const userData = userDoc.data();
                     const username = userData.username || 'Без имени';
-                    const role = userData.role === 'admin' ? 'Администратор' : (userData.role === 'master' ? 'Мастер' : 'Игрок');
+                    const role = getRoleName(userData.role);
                     const regDate = userData.createdAt ? new Date(userData.createdAt).toLocaleDateString('ru-RU') : 'Неизвестно';
+                    const quote = userData.quote || '';
                     
-                    const avatarUrl = `https://api.dicebear.com/9.x/micah/svg?seed=${encodeURIComponent(username)}&backgroundColor=7c3aed,a78bfa,4c1d95,8b5cf6,c4b5fd&radius=50`;
+                    const avatarUrl = getAvatarUrl(username, 150);
+                    
+                    const quoteHtml = quote ? `
+                        <div class="public-quote">
+                            <div class="public-quote-label">Цитата</div>
+                            <div class="public-quote-text">${quote}</div>
+                        </div>
+                    ` : `
+                        <div class="public-quote">
+                            <div class="public-quote-label">Цитата</div>
+                            <div class="empty-quote">Пользователь пока не добавил цитату</div>
+                        </div>
+                    `;
                     
                     const profileHTML = `
                         <div class="profile-sidebar">
-                            <img src="${avatarUrl}" alt="Avatar" class="avatar-img" onerror="this.src='https://placehold.co/150x150/7c3aed/white?text=?'">
+                            <img src="${avatarUrl}" alt="Avatar" class="avatar-img" onerror="this.src='${settings?.avatars?.fallbackImage}'">
                             <div class="profile-info">
                                 <p><span class="profile-label">Логин:</span> ${username}</p>
                                 <p><span class="profile-label">Роль:</span> ${role}</p>
@@ -57,6 +85,7 @@
                             </div>
                         </div>
                         <div class="profile-content">
+                            ${quoteHtml}
                             <h2>Персонажи</h2>
                             <div id="charactersList" class="grid"><div class="empty-state">Загрузка персонажей...</div></div>
                         </div>
@@ -66,6 +95,7 @@
                     const q = query(collection(db, "characters"), where("uid", "==", userId));
                     const snapshot = await getDocs(q);
                     const container = document.getElementById('charactersList');
+                    
                     if (snapshot.empty) {
                         container.innerHTML = '<div class="empty-state">У пользователя нет персонажей</div>';
                     } else {

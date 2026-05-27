@@ -1,20 +1,25 @@
-/* DnD Картакар - Магический фиолетовый стиль */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap');
+/* DnD Картакар - Сине-фиолетовая магическая тема */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Raleway:wght@300;400;500;600&display=swap');
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
 body {
     font-family: 'Raleway', sans-serif;
-    background: linear-gradient(135deg, #0f0717 0%, #1a0a2e 50%, #0f0717 100%);
-    color: #d4c5e8;
+    background: linear-gradient(135deg, #0f0c2e 0%, #1a1a4e 50%, #16213e 100%);
+    color: #d4e0ff;
     min-height: 100vh;
 }
 
 .navbar {
-    background: rgba(20, 10, 40, 0.95);
+    background: rgba(15, 20, 45, 0.95);
     backdrop-filter: blur(10px);
-    padding: 1rem 2rem;
-    border-bottom: 2px solid #7c3aed;
+    padding: 0.8rem 2rem;
+    border-bottom: 2px solid #4c3b9e;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -34,7 +39,7 @@ body {
     font-size: 1.6rem;
     font-weight: bold;
     font-family: 'Playfair Display', serif;
-    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -43,42 +48,77 @@ body {
 
 .nav-links {
     display: flex;
-    gap: 1.5rem;
+    gap: 1rem;
     align-items: center;
     flex-wrap: wrap;
 }
 
 .nav-links a {
-    color: #b8a8e0;
+    color: #c4b5fd;
     text-decoration: none;
     padding: 0.5rem 1rem;
     border-radius: 25px;
     transition: all 0.3s;
+    font-weight: 500;
 }
 
-.nav-links a:hover { background: #7c3aed; color: white; }
+.nav-links a:hover {
+    background: #4c3b9e;
+    color: white;
+}
 
-.user-info {
+/* Блок профиля в навигации */
+.user-nav-block {
     display: flex;
     align-items: center;
     gap: 1rem;
-    background: #2d1b4e;
-    padding: 0.5rem 1.2rem;
-    border-radius: 30px;
+    background: rgba(76, 59, 158, 0.4);
+    padding: 0.3rem 0.8rem 0.3rem 0.3rem;
+    border-radius: 50px;
+    border: 1px solid #4c3b9e;
 }
 
-.username { color: #a78bfa; font-weight: 600; }
+.user-nav-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #8b5cf6;
+}
 
-.logout-btn {
-    background: #4c1d95;
+.user-nav-name {
     color: #c4b5fd;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.user-nav-link {
+    color: #a78bfa;
+    text-decoration: none;
+    font-size: 0.85rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    background: rgba(139, 92, 246, 0.2);
+}
+
+.user-nav-link:hover {
+    background: #4c3b9e;
+    color: white;
+}
+
+.logout-btn-nav {
+    background: #dc2626;
+    color: white;
     border: none;
     padding: 0.3rem 0.8rem;
-    border-radius: 20px;
+    border-radius: 25px;
     cursor: pointer;
+    font-size: 0.8rem;
 }
 
-.logout-btn:hover { background: #7c3aed; color: white; }
+.logout-btn-nav:hover {
+    background: #b91c1c;
+}
 
 .container {
     max-width: 1400px;
@@ -87,52 +127,80 @@ body {
 }
 
 .card {
-    background: rgba(45, 27, 78, 0.85);
+    background: rgba(25, 30, 60, 0.85);
     backdrop-filter: blur(5px);
     border-radius: 25px;
     padding: 2rem;
     margin-bottom: 1.5rem;
-    border: 1px solid rgba(124, 58, 237, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(76, 59, 158, 0.5);
 }
 
 .card h1, .card h2, .card h3 {
     font-family: 'Playfair Display', serif;
-    color: #a78bfa;
+    color: #8b5cf6;
     margin-bottom: 1rem;
 }
 
-.card h1 { font-size: 2rem; }
+.card h1 {
+    font-size: 2rem;
+    border-left: 4px solid #8b5cf6;
+    padding-left: 1rem;
+}
 
 .btn {
-    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    background: linear-gradient(135deg, #6366f1, #4c3b9e);
     color: white;
     border: none;
     padding: 0.6rem 1.5rem;
     border-radius: 40px;
     cursor: pointer;
     font-weight: 600;
+    transition: all 0.3s;
     text-decoration: none;
     display: inline-block;
 }
 
-.btn:hover { transform: translateY(-2px); background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+.btn:hover {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+}
 
-.btn-danger { background: linear-gradient(135deg, #dc2626, #b91c1c); }
-.btn-secondary { background: linear-gradient(135deg, #4c1d95, #3b0764); }
+.btn-danger {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
 
-.form-group { margin-bottom: 1.5rem; }
-label { display: block; margin-bottom: 0.5rem; color: #a78bfa; font-weight: 600; }
+.btn-secondary {
+    background: linear-gradient(135deg, #4c1d95, #3b0764);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #8b5cf6;
+    font-weight: 600;
+}
 
 input, select, textarea {
     width: 100%;
     padding: 0.8rem 1rem;
-    border: 2px solid #7c3aed;
+    border: 2px solid #4c3b9e;
     border-radius: 15px;
-    background: rgba(0, 0, 0, 0.4);
-    color: #e0d4ff;
+    background: rgba(0, 0, 0, 0.3);
+    color: #d4e0ff;
+    font-size: 1rem;
 }
 
-input:focus, select:focus, textarea:focus { outline: none; border-color: #a78bfa; }
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+}
 
 .message {
     padding: 1rem;
@@ -141,8 +209,17 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #a78bfa
     text-align: center;
 }
 
-.message.success { background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: #86efac; }
-.message.error { background: rgba(220, 38, 38, 0.2); border: 1px solid #dc2626; color: #fca5a5; }
+.message.success {
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid #22c55e;
+    color: #86efac;
+}
+
+.message.error {
+    background: rgba(220, 38, 38, 0.2);
+    border: 1px solid #dc2626;
+    color: #fca5a5;
+}
 
 .grid {
     display: grid;
@@ -155,33 +232,55 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #a78bfa
     background: rgba(0, 0, 0, 0.3);
     border-radius: 20px;
     padding: 1.2rem;
-    border-left: 4px solid #7c3aed;
+    border-left: 4px solid #8b5cf6;
+    transition: all 0.3s;
 }
 
-.empty-state { text-align: center; padding: 3rem; color: #a78bfa; }
+.game-card:hover {
+    transform: translateY(-3px);
+    background: rgba(0, 0, 0, 0.4);
+}
 
-/* Новости */
-.news-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #8b5cf6;
 }
 
 .news-card {
     background: rgba(0, 0, 0, 0.3);
     border-radius: 20px;
     padding: 1.2rem;
+    margin-bottom: 1rem;
     transition: all 0.3s;
 }
 
-.news-card:hover { transform: translateX(5px); background: rgba(0, 0, 0, 0.4); }
+.news-card:hover {
+    background: rgba(0, 0, 0, 0.4);
+    transform: translateX(5px);
+}
 
-.news-title { font-size: 1.3rem; color: #c4b5fd; margin-bottom: 0.5rem; }
-.news-meta { font-size: 0.8rem; color: #a78bfa; margin-bottom: 1rem; }
-.news-short { color: #d4c5e8; line-height: 1.5; }
-.news-full { display: none; margin-top: 1rem; line-height: 1.6; }
-.news-card.expanded .news-full { display: block; }
-.news-card.expanded .news-short { display: none; }
+.news-title {
+    font-size: 1.3rem;
+    color: #c4b5fd;
+    margin-bottom: 0.5rem;
+}
+
+.news-meta {
+    font-size: 0.8rem;
+    color: #8b5cf6;
+    margin-bottom: 1rem;
+}
+
+.news-meta a {
+    color: #a78bfa;
+    text-decoration: none;
+}
+
+.news-meta a:hover {
+    color: #c4b5fd;
+    text-decoration: underline;
+}
 
 .read-more {
     background: none;
@@ -189,12 +288,21 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #a78bfa
     color: #a78bfa;
     cursor: pointer;
     margin-top: 0.5rem;
-    font-size: 0.9rem;
 }
 
-.read-more:hover { color: #c4b5fd; }
+.news-full {
+    display: none;
+    margin-top: 1rem;
+}
 
-/* Профиль пользователя */
+.news-card.expanded .news-full {
+    display: block;
+}
+
+.news-card.expanded .news-short {
+    display: none;
+}
+
 .profile-container {
     display: grid;
     grid-template-columns: 300px 1fr;
@@ -202,34 +310,38 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #a78bfa
 }
 
 .profile-sidebar {
-    background: rgba(45, 27, 78, 0.85);
+    background: rgba(25, 30, 60, 0.85);
     border-radius: 25px;
     padding: 1.5rem;
     text-align: center;
 }
 
-.avatar-placeholder {
+.avatar-img {
     width: 150px;
     height: 150px;
-    background: linear-gradient(135deg, #7c3aed, #4c1d95);
     border-radius: 50%;
     margin: 0 auto 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 3rem;
+    display: block;
+    background: #4c3b9e;
+    object-fit: cover;
+    border: 3px solid #8b5cf6;
 }
 
-.profile-info p { margin: 0.5rem 0; }
-.profile-label { color: #a78bfa; font-weight: 600; }
+.profile-info p {
+    margin: 0.5rem 0;
+}
+
+.profile-label {
+    color: #8b5cf6;
+    font-weight: 600;
+}
 
 .profile-content {
-    background: rgba(45, 27, 78, 0.85);
+    background: rgba(25, 30, 60, 0.85);
     border-radius: 25px;
     padding: 1.5rem;
 }
 
-/* Админ панель */
 .admin-tabs {
     display: flex;
     gap: 1rem;
@@ -238,7 +350,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #a78bfa
 }
 
 .tab-btn-admin {
-    background: rgba(124, 58, 237, 0.2);
+    background: rgba(99, 102, 241, 0.2);
     border: none;
     padding: 0.7rem 1.5rem;
     border-radius: 25px;
@@ -247,10 +359,18 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #a78bfa
     font-weight: 600;
 }
 
-.tab-btn-admin.active { background: linear-gradient(135deg, #7c3aed, #6d28d9); color: white; }
+.tab-btn-admin.active {
+    background: linear-gradient(135deg, #6366f1, #4c3b9e);
+    color: white;
+}
 
-.admin-panel { display: none; }
-.admin-panel.active { display: block; }
+.admin-panel {
+    display: none;
+}
+
+.admin-panel.active {
+    display: block;
+}
 
 .admin-table {
     width: 100%;
@@ -263,16 +383,19 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #a78bfa
 .admin-table th, .admin-table td {
     padding: 0.8rem;
     text-align: left;
-    border-bottom: 1px solid #7c3aed;
+    border-bottom: 1px solid #4c3b9e;
 }
 
-.admin-table th { background: #2d1b4e; color: #a78bfa; }
+.admin-table th {
+    background: #1a1a4e;
+    color: #8b5cf6;
+}
 
 .role-select {
     padding: 0.3rem 0.6rem;
     border-radius: 20px;
-    border: 1px solid #7c3aed;
-    background: #1a0a2e;
+    border: 1px solid #4c3b9e;
+    background: #0f0c2e;
     color: #c4b5fd;
     cursor: pointer;
 }
@@ -287,23 +410,51 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #a78bfa
 }
 
 @media (max-width: 768px) {
-    .profile-container { grid-template-columns: 1fr; }
-    .nav-container { flex-direction: column; }
-    .container { padding: 0 1rem; }
+    .profile-container {
+        grid-template-columns: 1fr;
+    }
+    .nav-container {
+        flex-direction: column;
+    }
+    .container {
+        padding: 0 1rem;
+    }
 }
 
-
-/* Стили для аватарок DiceBear */
-.avatar-img {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    object-fit: cover;
+/* Стили для публичной цитаты на странице профиля */
+.public-quote {
+    background: linear-gradient(135deg, rgba(76, 59, 158, 0.2), rgba(99, 102, 241, 0.1));
+    border-left: 4px solid #8b5cf6;
+    border-radius: 16px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
 }
-
-.avatar-small {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    vertical-align: middle;
+.public-quote-label {
+    font-size: 0.7rem;
+    color: #8b5cf6;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 0.5rem;
+}
+.public-quote-text {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: #c4b5fd;
+    line-height: 1.5;
+}
+.public-quote-text::before {
+    content: "«";
+    font-size: 1.2rem;
+    color: #8b5cf6;
+}
+.public-quote-text::after {
+    content: "»";
+    font-size: 1.2rem;
+    color: #8b5cf6;
+    vertical-align: bottom;
+}
+.empty-quote {
+    color: #6b7280;
+    font-style: italic;
+    font-size: 0.9rem;
 }
