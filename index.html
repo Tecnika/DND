@@ -4,29 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DnD Картакар</title>
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="./css/main.css">
 </head>
 <body>
     <div id="nav-placeholder"></div>
     <div class="container">
         <div class="card">
             <div class="grid" style="grid-template-columns: repeat(2, 1fr);">
-                <div class="game-card">
-                    <h3>Лор мира</h3>
-                    <p>История и легенды</p>
-                    <a href="lore.html" class="btn">Изучить</a>
-                </div>
-                <div class="game-card">
-                    <h3>Сообщество</h3>
-                    <p>Встречайте других искателей приключений</p>
-                    <a href="user.html" class="btn">К сообществу</a>
-                </div>
+                <div class="game-card"><h3>Лор мира</h3><p>История и легенды</p><a href="./lore.html" class="btn">Изучить</a></div>
+                <div class="game-card"><h3>Сообщество</h3><p>Встречайте других искателей приключений</p><a href="./user-list.html" class="btn">К сообществу</a></div>
             </div>
         </div>
-        <div class="card">
-            <h1>Новости мира</h1>
-            <div id="newsList"><div class="empty-state">Загрузка...</div></div>
-        </div>
+        <div class="card"><h1>Новости мира</h1><div id="newsList"><div class="empty-state">Загрузка...</div></div></div>
     </div>
     <script type="module">
         import { loadNavigation } from './js/common.js';
@@ -39,35 +28,22 @@
             const container = document.getElementById('newsList');
             const q = query(collection(db, "news"), orderBy("createdAt", "desc"));
             const snapshot = await getDocs(q);
-            
-            if (snapshot.empty) {
-                container.innerHTML = '<div class="empty-state">Новостей пока нет</div>';
-                return;
-            }
-            
+            if (snapshot.empty) { container.innerHTML = '<div class="empty-state">Новостей пока нет</div>'; return; }
             let html = '';
             for (const docSnap of snapshot.docs) {
                 const news = docSnap.data();
                 const shortText = news.fullText.substring(0, 200) + (news.fullText.length > 200 ? '...' : '');
                 const date = news.createdAt ? new Date(news.createdAt).toLocaleDateString('ru-RU') : 'Дата неизвестна';
-                
                 let authorDisplay = news.authorName || 'Админ';
                 if (news.authorId) {
-                    const userDoc = await getDoc(doc(db, "players", news.authorId));
-                    if (userDoc.exists()) {
-                        authorDisplay = `<a href="profile-page.html?id=${news.authorId}">${userDoc.data().username}</a>`;
-                    }
+                    try {
+                        const userDoc = await getDoc(doc(db, "players", news.authorId));
+                        if (userDoc.exists()) {
+                            authorDisplay = `<a href="./profile-page.html?id=${news.authorId}">${userDoc.data().username}</a>`;
+                        }
+                    } catch(e) { console.error('Ошибка получения автора:', e); }
                 }
-                
-                html += `
-                    <div class="news-card">
-                        <div class="news-title">📰 ${news.title}</div>
-                        <div class="news-meta">📅 ${date} | ✍️ ${authorDisplay}</div>
-                        <div class="news-short">${shortText}</div>
-                        <div class="news-full">${news.fullText}</div>
-                        <button class="read-more" onclick="toggleNews(this)">Читать далее</button>
-                    </div>
-                `;
+                html += `<div class="news-card"><div class="news-title">📰 ${news.title}</div><div class="news-meta">📅 ${date} | ✍️ ${authorDisplay}</div><div class="news-short">${shortText}</div><div class="news-full">${news.fullText}</div><button class="read-more" onclick="toggleNews(this)">Читать далее</button></div>`;
             }
             container.innerHTML = html;
         }

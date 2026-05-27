@@ -1,63 +1,23 @@
 {
   "avatars": {
-    "style": "lorelei",
+    "style": "adventurer",
     "size": 150,
     "smallSize": 32,
-    "colors": [
-      "6366f1",
-      "4c3b9e",
-      "8b5cf6",
-      "a78bfa",
-      "c4b5fd"
-    ],
-    "backgroundColor": "6366f1,4c3b9e,8b5cf6,a78bfa,c4b5fd",
-    "radius": 50,
-    "fallbackImage": "https://placehold.co/150x150/4c3b9e/white?text=?"
+    "backgroundColor": "6366f1,4c3b9e,8b5cf6",
+    "radius": 50
   },
   "roles": {
     "admin": {
       "name": "Администратор",
-      "icon": "👑",
-      "permissions": [
-        "admin_panel",
-        "master_panel",
-        "edit_news",
-        "delete_users",
-        "edit_roles",
-        "view_all_characters"
-      ]
+      "icon": "👑"
     },
     "master": {
       "name": "Мастер",
-      "icon": "🎲",
-      "permissions": [
-        "master_panel",
-        "view_all_characters"
-      ]
+      "icon": "🎲"
     },
     "player": {
       "name": "Игрок",
-      "icon": "🎮",
-      "permissions": [
-        "create_characters",
-        "edit_own_characters",
-        "view_own_characters"
-      ]
+      "icon": "🎮"
     }
-  },
-  "navigation": {
-    "showLore": true,
-    "showGames": true,
-    "showAdminPanel": true,
-    "showMasterWorkshop": true
-  },
-  "news": {
-    "shortTextLength": 200,
-    "newsPerPage": 10
-  },
-  "app": {
-    "name": "DnD Картакар",
-    "version": "1.0.0",
-    "theme": "dark-purple"
   }
 }
