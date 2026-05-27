@@ -1,67 +1,111 @@
 const fs = require('fs');
 const path = require('path');
 
-console.log('🔍 Диагностика структуры репозитория для GitHub Pages...\n');
+const authJSPath = path.join(__dirname, 'js', 'auth.js');
 
-// Проверяем наличие файлов
-const requiredFiles = [
-    'index.html',
-    'nav.html',
-    'auth.html',
-    'admin.html',
-    'lore.html',
-    'master.html',
-    'user.html',
-    'user-list.html',
-    'profile-page.html',
-    'css/main.css',
-    'js/common.js',
-    'js/firebase-config.js',
-    'settings/settings.json'
-];
+const correctAuthJS = `import { auth, db } from './firebase-config.js';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-let missingFiles = [];
+function usernameToEmail(username) {
+    const clean = username.toLowerCase().replace(/[^a-z0-9]/g, '');
+    return \`\${clean}@dnd-local.com\`;
+}
 
-for (const file of requiredFiles) {
-    const fullPath = path.join(__dirname, file);
-    if (fs.existsSync(fullPath)) {
-        console.log(`✅ ${file}`);
+window.switchTab = (tab) => {
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const btns = document.querySelectorAll('.tab-btn');
+    
+    if (tab === 'login') {
+        loginForm.classList.add('active');
+        registerForm.classList.remove('active');
+        btns[0].classList.add('active');
+        btns[1].classList.remove('active');
     } else {
-        console.log(`❌ ${file} - ОТСУТСТВУЕТ`);
-        missingFiles.push(file);
+        loginForm.classList.remove('active');
+        registerForm.classList.add('active');
+        btns[0].classList.remove('active');
+        btns[1].classList.add('active');
     }
-}
+};
+
+// РЕГИСТРАЦИЯ
+document.getElementById('register')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('regUsername').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const messageDiv = document.getElementById('message');
+    
+    if (!username) { messageDiv.innerHTML = '<div class="message error">Введите логин</div>'; return; }
+    if (password.length < 6) { messageDiv.innerHTML = '<div class="message error">Пароль минимум 6 символов</div>'; return; }
+    
+    const email = usernameToEmail(username);
+    
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await setDoc(doc(db, "players", userCredential.user.uid), {
+            username: username,
+            role: "player",
+            flg_active: true,
+            createdAt: new Date().toISOString()
+        });
+        messageDiv.innerHTML = '<div class="message success">Регистрация успешна</div>';
+        // РЕДИРЕКТ НА ГЛАВНУЮ СТРАНИЦУ
+        setTimeout(() => window.location.href = './index.html', 1500);
+    } catch (error) {
+        if (error.code === 'auth/email-already-in-use') {
+            messageDiv.innerHTML = '<div class="message error">Логин занят</div>';
+        } else {
+            messageDiv.innerHTML = '<div class="message error">Ошибка: ' + error.message + '</div>';
+        }
+    }
+});
+
+// ВХОД
+document.getElementById('login')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const messageDiv = document.getElementById('message');
+    
+    if (!username) { messageDiv.innerHTML = '<div class="message error">Введите логин</div>'; return; }
+    
+    const email = usernameToEmail(username);
+    
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+        messageDiv.innerHTML = '<div class="message success">Вход выполнен</div>';
+        // РЕДИРЕКТ НА ГЛАВНУЮ СТРАНИЦУ
+        setTimeout(() => window.location.href = './index.html', 1000);
+    } catch (error) {
+        messageDiv.innerHTML = '<div class="message error">Неверный логин или пароль</div>';
+    }
+});
+
+// Проверка авторизации - редирект на главную, а не на profile.html
+onAuthStateChanged(auth, (user) => {
+    if (user && window.location.pathname.includes('auth.html')) {
+        window.location.href = './index.html';
+    }
+});
+`;
+
+fs.writeFileSync(authJSPath, correctAuthJS, 'utf8');
+console.log('✅ Исправлен js/auth.js');
+console.log('   - Редирект после логина теперь на index.html');
+console.log('   - Редирект после регистрации теперь на index.html');
+console.log('   - Проверка авторизации теперь на index.html');
 
 console.log('\n═══════════════════════════════════════════════════════════');
-
-if (missingFiles.length > 0) {
-    console.log('⚠️ ОТСУТСТВУЮТ ФАЙЛЫ:');
-    for (const file of missingFiles) {
-        console.log(`   - ${file}`);
-    }
-    console.log('\nЭти файлы нужно добавить в репозиторий!');
-} else {
-    console.log('✅ Все файлы на месте');
-}
-
-// Создаём .nojekyll
-const nojekyllPath = path.join(__dirname, '.nojekyll');
-if (!fs.existsSync(nojekyllPath)) {
-    fs.writeFileSync(nojekyllPath, '');
-    console.log('\n✅ Создан файл .nojekyll');
-} else {
-    console.log('\n✅ .nojekyll уже существует');
-}
-
-// Проверяем git status
-console.log('\n═══════════════════════════════════════════════════════════');
-console.log('ВЫПОЛНИТЕ В ТЕРМИНАЛЕ:');
+console.log('ГОТОВО');
 console.log('═══════════════════════════════════════════════════════════');
 console.log('');
-console.log('  git add .');
-console.log('  git add -f .nojekyll');
-console.log('  git commit -m "Add all files and .nojekyll"');
-console.log('  git push origin main --force');
+console.log('ТЕПЕРЬ ВЫПОЛНИТЕ:');
 console.log('');
-console.log('После этого подождите 3 минуты и обновите страницу');
+console.log('  git add js/auth.js');
+console.log('  git commit -m "Fix redirect from profile.html to index.html"');
+console.log('  git push origin main');
+console.log('');
+console.log('После этого обновите страницу и войдите снова');
 console.log('═══════════════════════════════════════════════════════════');
