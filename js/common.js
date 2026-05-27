@@ -48,7 +48,7 @@ export async function loadNavigation() {
         navPlaceholder.innerHTML = navHtml;
     } catch (error) {
         console.error('Nav error:', error);
-        navPlaceholder.innerHTML = '<nav class="navbar"><div class="nav-container"><a href="/" class="logo">DnD Картакар</a></div></nav>';
+        navPlaceholder.innerHTML = '<nav class="navbar"><div class="nav-container"><a href="./" class="logo">DnD Картакар</a></div></nav>';
     }
     
     return new Promise((resolve) => {
