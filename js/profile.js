@@ -38,7 +38,7 @@ window.deleteCharacter = async (id) => {
 document.getElementById('usernameDisplay') && (document.getElementById('usernameDisplay').textContent = currentUsername);
 
 onAuthStateChanged(auth, async (user) => {
-    if (!user && window.location.pathname.includes('profile.html')) {
+    if (!user && window.location.pathname.includes('index.html')) {
         window.location.href = '/auth.html';
         return;
     }

@@ -38,7 +38,7 @@ window.saveCharacter = async () => {
     
     await addDoc(collection(db, "characters"), { ...window.currentGenerated, uid: auth.currentUser.uid, createdAt: new Date().toISOString() });
     alert('Персонаж сохранён');
-    window.location.href = '/profile.html';
+    window.location.href = '/index.html';
 };
 
 await loadNavigation();
