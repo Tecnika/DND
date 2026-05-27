@@ -9,7 +9,7 @@ export let settings = null;
 
 async function loadSettings() {
     try {
-        const response = await fetch('/settings/settings.json?t=' + Date.now());
+        const response = await fetch('settings/settings.json?t=' + Date.now());
         settings = await response.json();
         console.log('Настройки загружены, стиль аватарок:', settings?.avatars?.style);
     } catch (error) {
@@ -45,7 +45,7 @@ export async function loadNavigation() {
     const navPlaceholder = document.getElementById('nav-placeholder');
     if (!navPlaceholder) return;
     
-    const response = await fetch('/nav.html');
+    const response = await fetch('nav.html');
     const navHtml = await response.text();
     navPlaceholder.innerHTML = navHtml;
     

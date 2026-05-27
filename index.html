@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DnD Картакар</title>
-    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
     <div id="nav-placeholder"></div>
@@ -14,12 +14,12 @@
                 <div class="game-card">
                     <h3>Лор мира</h3>
                     <p>История и легенды</p>
-                    <a href="/lore.html" class="btn">Изучить</a>
+                    <a href="lore.html" class="btn">Изучить</a>
                 </div>
                 <div class="game-card">
                     <h3>Сообщество</h3>
                     <p>Встречайте других искателей приключений</p>
-                    <a href="/user.html" class="btn">К сообществу</a>
+                    <a href="user.html" class="btn">К сообществу</a>
                 </div>
             </div>
         </div>
@@ -55,7 +55,7 @@
                 if (news.authorId) {
                     const userDoc = await getDoc(doc(db, "players", news.authorId));
                     if (userDoc.exists()) {
-                        authorDisplay = `<a href="/profile-page.html?id=${news.authorId}">${userDoc.data().username}</a>`;
+                        authorDisplay = `<a href="profile-page.html?id=${news.authorId}">${userDoc.data().username}</a>`;
                     }
                 }
                 

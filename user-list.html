@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Сообщество - DnD Картакар</title>
-    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="css/main.css">
     <style>
         .users-grid {
             display: grid;
@@ -87,7 +87,7 @@
                     <div class="user-card">
                         <img src="${avatarUrl}" class="user-avatar" onerror="this.src='${settings?.avatars?.fallbackImage}'">
                         <div class="user-name">
-                            <a href="/profile-page.html?id=${docSnap.id}" style="color: #c4b5fd; text-decoration: none;">${username}</a>
+                            <a href="profile-page.html?id=${docSnap.id}" style="color: #c4b5fd; text-decoration: none;">${username}</a>
                         </div>
                         <div class="user-role">${role}</div>
                         ${quote ? `<div class="user-quote">"${quote.substring(0, 60)}${quote.length > 60 ? '...' : ''}"</div>` : ''}
