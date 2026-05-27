@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход - DnD Картакар</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <style>
+        .tab-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 0.7rem;
+            background: #4c1d95;
+            border: none;
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background: #7c3aed;
+        }
+        .form {
+            display: none;
+        }
+        .form.active {
+            display: block;
+        }
+        .debug {
+            background: #1a0a2e;
+            padding: 0.5rem;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            margin-top: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="nav-placeholder"></div>
+    <div class="container" style="max-width:500px">
+        <div class="card">
+            <h1>Вход в мир</h1>
+            
+            <div class="tab-container">
+                <button class="tab-btn active" id="loginTab">Вход</button>
+                <button class="tab-btn" id="registerTab">Регистрация</button>
+            </div>
+            
+            <div id="loginForm" class="form active">
+                <form id="loginFormElement">
+                    <div class="form-group">
+                        <label>Логин</label>
+                        <input type="text" id="loginUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Пароль</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="btn">Войти</button>
+                </form>
+            </div>
+            
+            <div id="registerForm" class="form">
+                <form id="registerFormElement">
+                    <div class="form-group">
+                        <label>Логин</label>
+                        <input type="text" id="regUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Пароль (мин. 6 символов)</label>
+                        <input type="password" id="regPassword" required>
+                    </div>
+                    <button type="submit" class="btn">Создать</button>
+                </form>
+            </div>
+            
+            <div id="message"></div>
+            <div id="debug" class="debug"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from './js/firebase-config.js';
+        import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { loadNavigation } from './js/common.js';
+        
+        // Загружаем навигацию
+        loadNavigation();
+        
+        // Функция для отладки
+        function debugLog(msg) {
+            const debugDiv = document.getElementById('debug');
+            debugDiv.style.display = 'block';
+            debugDiv.innerHTML += new Date().toLocaleTimeString() + ': ' + msg + '<br>';
+            console.log(msg);
+        }
+        
+        function usernameToEmail(username) {
+            const clean = username.toLowerCase().replace(/[^a-z0-9]/g, '');
+            return `${clean}@dnd-local.com`;
+        }
+        
+        // Переключение вкладок
+        const loginTab = document.getElementById('loginTab');
+        const registerTab = document.getElementById('registerTab');
+        const loginFormDiv = document.getElementById('loginForm');
+        const registerFormDiv = document.getElementById('registerForm');
+        
+        loginTab.addEventListener('click', () => {
+            loginTab.classList.add('active');
+            registerTab.classList.remove('active');
+            loginFormDiv.classList.add('active');
+            registerFormDiv.classList.remove('active');
+        });
+        
+        registerTab.addEventListener('click', () => {
+            registerTab.classList.add('active');
+            loginTab.classList.remove('active');
+            registerFormDiv.classList.add('active');
+            loginFormDiv.classList.remove('active');
+        });
+        
+        // РЕГИСТРАЦИЯ
+        const registerForm = document.getElementById('registerFormElement');
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            debugLog('Регистрация начата');
+            
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const messageDiv = document.getElementById('message');
+            
+            debugLog('Логин: ' + username);
+            
+            if (!username) {
+                messageDiv.innerHTML = '<div class="message error">Введите логин</div>';
+                return;
+            }
+            if (password.length < 6) {
+                messageDiv.innerHTML = '<div class="message error">Пароль минимум 6 символов</div>';
+                return;
+            }
+            
+            const email = usernameToEmail(username);
+            debugLog('Email: ' + email);
+            
+            try {
+                debugLog('Создаём пользователя в Auth...');
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                debugLog('Пользователь создан: ' + user.uid);
+                
+                debugLog('Записываем в Firestore...');
+                await setDoc(doc(db, "players", user.uid), {
+                    username: username,
+                    role: "player",
+                    flg_active: true,
+                    createdAt: new Date().toISOString()
+                });
+                debugLog('Firestore записан успешно!');
+                
+                messageDiv.innerHTML = '<div class="message success">Регистрация успешна!</div>';
+                setTimeout(() => {
+                    window.location.href = '/profile.html';
+                }, 1500);
+                
+            } catch (error) {
+                debugLog('ОШИБКА: ' + error.code + ' - ' + error.message);
+                if (error.code === 'auth/email-already-in-use') {
+                    messageDiv.innerHTML = '<div class="message error">Логин занят</div>';
+                } else {
+                    messageDiv.innerHTML = '<div class="message error">Ошибка: ' + error.message + '</div>';
+                }
+            }
+        });
+        
+        // ВХОД
+        const loginForm = document.getElementById('loginFormElement');
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            debugLog('Вход начат');
+            
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const messageDiv = document.getElementById('message');
+            
+            debugLog('Логин: ' + username);
+            
+            if (!username) {
+                messageDiv.innerHTML = '<div class="message error">Введите логин</div>';
+                return;
+            }
+            
+            const email = usernameToEmail(username);
+            debugLog('Email: ' + email);
+            
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                debugLog('Вход выполнен');
+                messageDiv.innerHTML = '<div class="message success">Вход выполнен!</div>';
+                setTimeout(() => {
+                    window.location.href = '/profile.html';
+                }, 1000);
+            } catch (error) {
+                debugLog('ОШИБКА входа: ' + error.code);
+                messageDiv.innerHTML = '<div class="message error">Неверный логин или пароль</div>';
+            }
+        });
+        
+        debugLog('Страница загружена, скрипты инициализированы');
+    </script>
+</body>
+</html>

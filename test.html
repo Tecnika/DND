@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Тест Firebase</title>
+</head>
+<body>
+    <h1>Тест подключения Firebase</h1>
+    <button onclick="testFirebase()">Тест</button>
+    <pre id="output"></pre>
+
+    <script type="module">
+        import { auth, db } from './js/firebase-config.js';
+        import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        window.testFirebase = async () => {
+            const output = document.getElementById('output');
+            output.textContent = 'Начинаем тест...\n';
+            
+            try {
+                output.textContent += '1. Firebase загружен\n';
+                output.textContent += '2. auth: ' + (auth ? 'есть' : 'нет') + '\n';
+                output.textContent += '3. db: ' + (db ? 'есть' : 'нет') + '\n';
+                
+                // Пробуем создать тестового пользователя
+                const testEmail = 'test_' + Date.now() + '@test.local';
+                const testPassword = '123456';
+                
+                output.textContent += '4. Пробуем создать пользователя: ' + testEmail + '\n';
+                const userCredential = await createUserWithEmailAndPassword(auth, testEmail, testPassword);
+                output.textContent += '5. Пользователь создан: ' + userCredential.user.uid + '\n';
+                
+                // Пробуем записать в Firestore
+                output.textContent += '6. Пробуем записать в Firestore...\n';
+                await setDoc(doc(db, "players", userCredential.user.uid), {
+                    username: "testuser",
+                    role: "player",
+                    flg_active: true,
+                    createdAt: new Date().toISOString()
+                });
+                output.textContent += '7. УСПЕХ! Данные записаны в Firestore\n';
+                
+            } catch (error) {
+                output.textContent += 'ОШИБКА: ' + error.code + ' - ' + error.message + '\n';
+                console.error(error);
+            }
+        };
+    </script>
+</body>
+</html>

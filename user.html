@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль пользователя - DnD Картакар</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <style>
+        .profile-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 1.5rem;
+        }
+        .profile-sidebar {
+            background: rgba(45, 27, 78, 0.85);
+            border-radius: 25px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .avatar-placeholder {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, #7c3aed, #4c1d95);
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+        .profile-info p { margin: 0.5rem 0; }
+        .profile-label { color: #a78bfa; font-weight: 600; }
+        .profile-content {
+            background: rgba(45, 27, 78, 0.85);
+            border-radius: 25px;
+            padding: 1.5rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .game-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 1rem;
+            border-left: 3px solid #7c3aed;
+        }
+        .empty-state { text-align: center; padding: 2rem; color: #a78bfa; }
+        @media (max-width: 768px) {
+            .profile-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div id="nav-placeholder"></div>
+    
+    <div class="container">
+        <div id="profileContent" class="profile-container">
+            <div class="empty-state">Загрузка...</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db } from './js/firebase-config.js';
+        import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { loadNavigation } from './js/common.js';
+        
+        await loadNavigation();
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('id');
+        
+        if (!userId) {
+            document.getElementById('profileContent').innerHTML = '<div class="card"><div class="empty-state">Не указан ID пользователя</div></div>';
+        } else {
+            try {
+                const userDoc = await getDoc(doc(db, "players", userId));
+                
+                if (!userDoc.exists()) {
+                    document.getElementById('profileContent').innerHTML = '<div class="card"><div class="empty-state">Пользователь не найден</div></div>';
+                } else {
+                    const userData = userDoc.data();
+                    
+                    const profileHTML = `
+                        <div class="profile-sidebar">
+                            <div class="avatar-placeholder">🎲</div>
+                            <div class="profile-info">
+                                <p><span class="profile-label">Логин:</span> ${userData.username || 'Без имени'}</p>
+                                <p><span class="profile-label">Дата регистрации:</span> ${userData.createdAt ? new Date(userData.createdAt).toLocaleDateString('ru-RU') : 'Неизвестно'}</p>
+                                <p><span class="profile-label">Роль:</span> ${userData.role === 'admin' ? 'Администратор' : (userData.role === 'master' ? 'Мастер' : 'Игрок')}</p>
+                            </div>
+                        </div>
+                        <div class="profile-content">
+                            <h2>Персонажи</h2>
+                            <div id="charactersList" class="grid">
+                                <div class="empty-state">Загрузка персонажей...</div>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('profileContent').innerHTML = profileHTML;
+                    
+                    const q = query(collection(db, "characters"), where("uid", "==", userId));
+                    const snapshot = await getDocs(q);
+                    const container = document.getElementById('charactersList');
+                    
+                    if (snapshot.empty) {
+                        container.innerHTML = '<div class="empty-state">У пользователя нет персонажей</div>';
+                    } else {
+                        let charsHtml = '';
+                        snapshot.forEach(docSnap => {
+                            const char = docSnap.data();
+                            charsHtml += `
+                                <div class="game-card">
+                                    <h3>${char.name}</h3>
+                                    <p>${char.race || '?'} | ${char.class || '?'} | Уровень ${char.level || 1}</p>
+                                </div>
+                            `;
+                        });
+                        container.innerHTML = charsHtml;
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                document.getElementById('profileContent').innerHTML = '<div class="card"><div class="empty-state">Ошибка загрузки профиля</div></div>';
+            }
+        }
+    </script>
+</body>
+</html>
