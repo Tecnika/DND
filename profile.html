@@ -5,35 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мой профиль - DnD Картакар</title>
     <link rel="stylesheet" href="/css/main.css">
+    <style>
+        .profile-container { display: grid; grid-template-columns: 300px 1fr; gap: 1.5rem; }
+        .profile-sidebar { background: rgba(45, 27, 78, 0.85); border-radius: 25px; padding: 1.5rem; text-align: center; }
+        .avatar-img { width: 150px; height: 150px; border-radius: 50%; margin: 0 auto 1rem; display: block; background: #2d1b4e; object-fit: cover; }
+        .profile-info p { margin: 0.5rem 0; }
+        .profile-label { color: #a78bfa; font-weight: 600; }
+        .profile-content { background: rgba(45, 27, 78, 0.85); border-radius: 25px; padding: 1.5rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-top: 1rem; }
+        .game-card { background: rgba(0, 0, 0, 0.3); border-radius: 15px; padding: 1rem; border-left: 3px solid #7c3aed; }
+        .empty-state { text-align: center; padding: 2rem; color: #a78bfa; }
+        .btn { background: linear-gradient(135deg, #7c3aed, #6d28d9); color: white; border: none; padding: 0.6rem 1.5rem; border-radius: 40px; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-block; }
+        @media (max-width: 768px) { .profile-container { grid-template-columns: 1fr; } }
+    </style>
 </head>
 <body>
     <div id="nav-placeholder"></div>
-    
     <div class="container">
-        <div class="profile-container">
-            <!-- Левая колонка - профиль -->
-            <div class="profile-sidebar">
-                <div class="avatar-placeholder">
-                    🎲
-                </div>
-                <div class="profile-info">
-                    <p><span class="profile-label">Логин:</span> <span id="profileUsername">-</span></p>
-                    <p><span class="profile-label">Дата регистрации:</span> <span id="profileDate">-</span></p>
-                    <p><span class="profile-label">Роль:</span> <span id="profileRole">-</span></p>
-                </div>
-            </div>
-            
-            <!-- Правая колонка - игры -->
-            <div class="profile-content">
-                <h2>Мои игры</h2>
-                <div id="gamesList" class="grid">
-                    <div class="empty-state">Загрузка...</div>
-                </div>
-                <a href="/generate.html" class="btn" style="margin-top: 1rem;">Создать персонажа</a>
-            </div>
-        </div>
+        <div id="profileContent" class="profile-container"><div class="empty-state">Загрузка...</div></div>
     </div>
-
     <script type="module">
         import { auth, db } from './js/firebase-config.js';
         import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -42,37 +32,51 @@
         await loadNavigation();
         requireAuth();
         
-        // Загрузка профиля
-        if (auth.currentUser) {
+        async function loadProfile() {
+            if (!auth.currentUser) return;
             const userDoc = await getDoc(doc(db, "players", auth.currentUser.uid));
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                document.getElementById('profileUsername').textContent = userData.username;
-                document.getElementById('profileDate').textContent = userData.createdAt ? new Date(userData.createdAt).toLocaleDateString('ru-RU') : 'Неизвестно';
-                document.getElementById('profileRole').textContent = userData.role === 'admin' ? 'Администратор' : (userData.role === 'master' ? 'Мастер' : 'Игрок');
-            }
+            if (!userDoc.exists()) return;
             
-            // Загрузка персонажей
+            const userData = userDoc.data();
+            const username = userData.username || 'Игрок';
+            const role = userData.role === 'admin' ? 'Администратор' : (userData.role === 'master' ? 'Мастер' : 'Игрок');
+            const regDate = userData.createdAt ? new Date(userData.createdAt).toLocaleDateString('ru-RU') : 'Неизвестно';
+            
+            // DiceBear URL (стиль "micah" — геометрический, похож на beam)
+            const avatarUrl = `https://api.dicebear.com/9.x/micah/svg?seed=${encodeURIComponent(username)}&backgroundColor=7c3aed,a78bfa,4c1d95,8b5cf6,c4b5fd&radius=50`;
+            
+            const profileHTML = `
+                <div class="profile-sidebar">
+                    <img src="${avatarUrl}" alt="Avatar" class="avatar-img" onerror="this.src='https://placehold.co/150x150/7c3aed/white?text=?'">
+                    <div class="profile-info">
+                        <p><span class="profile-label">Логин:</span> ${username}</p>
+                        <p><span class="profile-label">Роль:</span> ${role}</p>
+                        <p><span class="profile-label">Дата регистрации:</span> ${regDate}</p>
+                    </div>
+                </div>
+                <div class="profile-content">
+                    <h2>Мои персонажи</h2>
+                    <div id="charactersList" class="grid"><div class="empty-state">Загрузка персонажей...</div></div>
+                    <a href="/generate.html" class="btn" style="margin-top: 1rem;">Создать персонажа</a>
+                </div>
+            `;
+            document.getElementById('profileContent').innerHTML = profileHTML;
+            
             const q = query(collection(db, "characters"), where("uid", "==", auth.currentUser.uid));
             const snapshot = await getDocs(q);
-            const gamesContainer = document.getElementById('gamesList');
-            
+            const container = document.getElementById('charactersList');
             if (snapshot.empty) {
-                gamesContainer.innerHTML = '<div class="empty-state">У вас пока нет персонажей</div>';
+                container.innerHTML = '<div class="empty-state">У вас пока нет персонажей</div>';
             } else {
-                let html = '';
-                snapshot.forEach(doc => {
-                    const char = doc.data();
-                    html += `
-                        <div class="game-card">
-                            <h3>${char.name}</h3>
-                            <p>${char.race || '?'} | ${char.class || '?'} | Уровень ${char.level || 1}</p>
-                        </div>
-                    `;
+                let charsHtml = '';
+                snapshot.forEach(docSnap => {
+                    const char = docSnap.data();
+                    charsHtml += `<div class="game-card"><h3>${char.name}</h3><p>${char.race || '?'} | ${char.class || '?'} | Уровень ${char.level || 1}</p></div>`;
                 });
-                gamesContainer.innerHTML = html;
+                container.innerHTML = charsHtml;
             }
         }
+        loadProfile();
     </script>
 </body>
 </html>

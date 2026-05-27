@@ -291,3 +291,19 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #a78bfa
     .nav-container { flex-direction: column; }
     .container { padding: 0 1rem; }
 }
+
+
+/* Стили для аватарок DiceBear */
+.avatar-img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-small {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    vertical-align: middle;
+}
