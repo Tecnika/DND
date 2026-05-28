@@ -168,7 +168,7 @@
                 
                 messageDiv.innerHTML = '<div class="message success">Регистрация успешна!</div>';
                 setTimeout(() => {
-                    window.location.href = '/index.html';
+                    window.location.href = './index.html';
                 }, 1500);
                 
             } catch (error) {
@@ -206,7 +206,7 @@
                 debugLog('Вход выполнен');
                 messageDiv.innerHTML = '<div class="message success">Вход выполнен!</div>';
                 setTimeout(() => {
-                    window.location.href = '/index.html';
+                    window.location.href = './index.html';
                 }, 1000);
             } catch (error) {
                 debugLog('ОШИБКА входа: ' + error.code);
