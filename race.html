@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Раса - DnD Картакар</title>
+    <link rel="stylesheet" href="./css/main.css">
+    <style>
+        .race-detail {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+        .race-header {
+            border-bottom: 2px solid #8b5cf6;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .race-name {
+            font-size: 2rem;
+            color: #c4b5fd;
+            margin-bottom: 0.3rem;
+        }
+        .race-generation {
+            color: #8b5cf6;
+            font-size: 0.9rem;
+        }
+        .info-section {
+            margin-bottom: 1.5rem;
+        }
+        .info-section h3 {
+            color: #a78bfa;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .info-table th, .info-table td {
+            padding: 0.6rem;
+            text-align: left;
+            border-bottom: 1px solid #4c3b9e;
+        }
+        .info-table th {
+            background: #1a1a4e;
+            color: #a78bfa;
+            width: 30%;
+        }
+        .traits-list, .strengths-list, .weaknesses-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .trait-tag {
+            background: #4c3b9e;
+            color: #c4b5fd;
+            padding: 0.2rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: #a78bfa;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            color: #c4b5fd;
+            text-decoration: underline;
+        }
+        .error-message {
+            color: #fca5a5;
+            text-align: center;
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="nav-placeholder"></div>
+    <div class="container">
+        <div class="card">
+            <a href="./races.html" class="back-link">← Назад к списку рас</a>
+            <div id="raceContent" class="race-detail">
+                <div class="loading">Загрузка...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { loadNavigation } from './js/common.js';
+        import { db } from './js/firebase-config.js';
+        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        
+        loadNavigation();
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const raceId = urlParams.get('id');
+        
+        function normalizeArray(value) {
+            if (!value) return [];
+            if (Array.isArray(value)) return value;
+            if (typeof value === 'string') return value.split(',').map(s => s.trim()).filter(s => s);
+            return [];
+        }
+        
+        async function loadRace() {
+            if (!raceId) {
+                document.getElementById('raceContent').innerHTML = '<div class="error-message">Не указана раса</div>';
+                return;
+            }
+            
+            try {
+                const snapshot = await getDocs(collection(db, "species"));
+                let race = null;
+                
+                for (const docSnap of snapshot.docs) {
+                    const data = docSnap.data();
+                    if (docSnap.id === raceId || data.id === raceId || data.name?.toLowerCase().replace(/ /g, '_') === raceId) {
+                        race = data;
+                        break;
+                    }
+                }
+                
+                if (!race) {
+                    document.getElementById('raceContent').innerHTML = '<div class="error-message">Раса не найдена</div>';
+                    return;
+                }
+                
+                // Нормализуем массивы
+                const traits = normalizeArray(race.traits);
+                const strengths = normalizeArray(race.strengths);
+                const weaknesses = normalizeArray(race.weaknesses);
+                
+                let traitsHtml = '';
+                if (traits.length > 0) {
+                    traitsHtml = `
+                        <div class="info-section">
+                            <h3>Особенности</h3>
+                            <div class="traits-list">
+                                ${traits.map(t => `<span class="trait-tag">${t}</span>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                let strengthsHtml = '';
+                if (strengths.length > 0) {
+                    strengthsHtml = `
+                        <div class="info-section">
+                            <h3>Сильные стороны</h3>
+                            <div class="strengths-list">
+                                ${strengths.map(s => `<span class="trait-tag">✨ ${s}</span>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                let weaknessesHtml = '';
+                if (weaknesses.length > 0) {
+                    weaknessesHtml = `
+                        <div class="info-section">
+                            <h3>Слабые стороны</h3>
+                            <div class="weaknesses-list">
+                                ${weaknesses.map(w => `<span class="trait-tag">⚠️ ${w}</span>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                let statsHtml = '';
+                if (race.stats && typeof race.stats === 'object' && Object.keys(race.stats).length > 0) {
+                    statsHtml = `
+                        <div class="info-section">
+                            <h3>Характеристики</h3>
+                            <table class="info-table">
+                                ${Object.entries(race.stats).map(([key, val]) => `
+                                    <tr><th>${key}</th><td>${val}</td><tr>
+                                `).join('')}
+                            </table>
+                        </div>
+                    `;
+                }
+                
+                const html = `
+                    <div class="race-header">
+                        <div class="race-name">✨ ${race.name || 'Без имени'}</div>
+                        <div class="race-generation">📜 Поколение: ${race.generation || 'Не указано'}</div>
+                    </div>
+                    <div class="info-section">
+                        <h3>Описание</h3>
+                        <p>${race.description || 'Описание отсутствует'}</p>
+                    </div>
+                    ${traitsHtml}
+                    ${strengthsHtml}
+                    ${weaknessesHtml}
+                    ${statsHtml}
+                `;
+                
+                document.getElementById('raceContent').innerHTML = html;
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                document.getElementById('raceContent').innerHTML = `<div class="error-message">Ошибка загрузки: ${error.message}</div>`;
+            }
+        }
+        
+        loadRace();
+    </script>
+</body>
+</html>

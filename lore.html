@@ -1,4 +1,65 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Лор мира - DnD Картакар</title><link rel="stylesheet" href="css/main.css"></head>
-<body><div id="nav-placeholder"></div><div class="container"><div class="card"><h1>Лор мира</h1><div class="empty-state">Лор мира в разработке</div></div></div><script type="module">import { loadNavigation } from './js/common.js'; loadNavigation();</script></body></html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лор мира - DnD Картакар</title>
+    <link rel="stylesheet" href="./css/main.css">
+    <style>
+        .lore-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .lore-link-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .lore-link-card:hover {
+            transform: translateY(-2px);
+            background: rgba(0, 0, 0, 0.4);
+        }
+        .lore-link-card a {
+            color: #c4b5fd;
+            text-decoration: none;
+            font-size: 1.1rem;
+        }
+        .lore-link-card a:hover {
+            color: #a78bfa;
+        }
+    </style>
+</head>
+<body>
+    <div id="nav-placeholder"></div>
+    <div class="container">
+        <div class="card">
+            <h1>Лор мира</h1>
+            <p>История, легенды и знания мира Этерния</p>
+            
+            <h2>Разделы лора</h2>
+            <div class="lore-links">
+                <div class="lore-link-card">
+                    <a href="./races.html">🧝 Расы мира</a>
+                    <p>Все расы, их особенности и история</p>
+                </div>
+                <div class="lore-link-card">
+                    <a href="./classes.html">⚔️ Классы</a>
+                    <p>Классы персонажей и их способности</p>
+                </div>
+                <div class="lore-link-card">
+                    <a href="./history.html">📜 История</a>
+                    <p>Хроники и легенды мира</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module">
+        import { loadNavigation } from './js/common.js';
+        loadNavigation();
+    </script>
+</body>
+</html>

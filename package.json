@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "firebase-admin": "^13.10.0"
+  },
+  "name": "dnd",
+  "version": "1.0.0",
+  "description": "",
+  "main": "update.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

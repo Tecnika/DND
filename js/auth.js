@@ -47,7 +47,7 @@ document.getElementById('register')?.addEventListener('submit', async (e) => {
         });
         messageDiv.innerHTML = '<div class="message success">Регистрация успешна</div>';
         // РЕДИРЕКТ НА ГЛАВНУЮ СТРАНИЦУ
-        setTimeout(() => window.location.href = '/DND/index.html', 1500);
+        setTimeout(() => window.location.href = './index.html', 1500);
     } catch (error) {
         if (error.code === 'auth/email-already-in-use') {
             messageDiv.innerHTML = '<div class="message error">Логин занят</div>';
@@ -72,7 +72,7 @@ document.getElementById('login')?.addEventListener('submit', async (e) => {
         await signInWithEmailAndPassword(auth, email, password);
         messageDiv.innerHTML = '<div class="message success">Вход выполнен</div>';
         // РЕДИРЕКТ НА ГЛАВНУЮ СТРАНИЦУ
-        setTimeout(() => window.location.href = '/DND/index.html', 1000);
+        setTimeout(() => window.location.href = './index.html', 1000);
     } catch (error) {
         messageDiv.innerHTML = '<div class="message error">Неверный логин или пароль</div>';
     }
@@ -81,6 +81,6 @@ document.getElementById('login')?.addEventListener('submit', async (e) => {
 // Проверка авторизации - редирект на главную, а не на profile.html
 onAuthStateChanged(auth, (user) => {
     if (user && window.location.pathname.includes('auth.html')) {
-        window.location.href = '/DND/index.html';
+        window.location.href = './index.html';
     }
 });
