@@ -7,7 +7,11 @@ import { el, createNavigation, createCard, createGameCard, createFooter, showMes
 import { initAuth, loadSettings } from '../common.js';
 
 /* ------- Инициализация страницы ------- */
+let pageInitialized = false;
+
 async function initPage() {
+    if (pageInitialized) return;
+    pageInitialized = true;
     try {
         const app = document.getElementById('app');
         if (!app) throw new Error('Контейнер #app не найден');

@@ -9,7 +9,11 @@ import { db } from '../firebase-config.js';
 import { collection, query, orderBy, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 /* ------- Инициализация страницы ------- */
+let pageInitialized = false;
+
 async function initPage() {
+    if (pageInitialized) return;
+    pageInitialized = true;
     try {
         const app = document.getElementById('app');
         if (!app) throw new Error('Контейнер #app не найден на странице');

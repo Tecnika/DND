@@ -20,7 +20,11 @@ const NAMES_SUFFIXES = ['дорн', 'гус', 'лиан', 'мон', 'нар', '�
 let currentGenerated = null; // Последний сгенерированный персонаж
 
 /* ------- Инициализация страницы ------- */
+let pageInitialized = false;
+
 async function initPage() {
+    if (pageInitialized) return;
+    pageInitialized = true;
     try {
         const app = document.getElementById('app');
         if (!app) throw new Error('Контейнер #app не найден');

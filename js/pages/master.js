@@ -8,7 +8,11 @@ import { el, createNavigation, createCard, createFooter, showMessage } from '../
 import { initAuth, loadSettings, isMasterOrAdmin, currentUserRole } from '../common.js';
 
 /* ------- Инициализация страницы ------- */
+let pageInitialized = false;
+
 async function initPage() {
+    if (pageInitialized) return;
+    pageInitialized = true;
     try {
         const app = document.getElementById('app');
         if (!app) throw new Error('Контейнер #app не найден');

@@ -15,7 +15,11 @@ let allGenerations = []; // Уникальные поколения
 let activeFilter = 'all'; // Активный фильтр
 
 /* ------- Инициализация страницы ------- */
+let pageInitialized = false;
+
 async function initPage() {
+    if (pageInitialized) return;
+    pageInitialized = true;
     try {
         const app = document.getElementById('app');
         if (!app) throw new Error('Контейнер #app не найден');

@@ -14,7 +14,11 @@ let profileUserId = null; // ID пользователя, чей профиль 
 let profileData = null;   // Данные просматриваемого профиля
 
 /* ------- Инициализация страницы ------- */
+let pageInitialized = false;
+
 async function initPage() {
+    if (pageInitialized) return;
+    pageInitialized = true;
     try {
         const app = document.getElementById('app');
         if (!app) throw new Error('Контейнер #app не найден');
