@@ -230,7 +230,7 @@ function renderNews(snapshot, container) {
                 dateValue = 'Дата неизвестна';
             }
         }
-        meta.appendChild(el('span', {}, dateText));
+        meta.appendChild(el('span', {}, dateValue));
 
         card.appendChild(meta);
 
