@@ -1,0 +1,23 @@
+{
+  "avatars": {
+    "style": "adventurer",
+    "size": 150,
+    "smallSize": 32,
+    "backgroundColor": "6366f1,4c3b9e,8b5cf6",
+    "radius": 50
+  },
+  "roles": {
+    "admin": {
+      "name": "Администратор",
+      "icon": "👑"
+    },
+    "master": {
+      "name": "Мастер",
+      "icon": "🎲"
+    },
+    "player": {
+      "name": "Игрок",
+      "icon": "🎮"
+    }
+  }
+}
