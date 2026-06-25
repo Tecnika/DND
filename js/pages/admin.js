@@ -494,6 +494,6 @@ async function handleDeleteNews(newsId, newsTitle) {
 }
 
 /* ------- Запуск страницы ------- */
-initAuth(() => {
-    initPage();
+initAuth(async () => {
+    await initPage();
 });

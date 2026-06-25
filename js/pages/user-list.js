@@ -134,6 +134,6 @@ async function loadUsers() {
 }
 
 /* ------- Запуск страницы ------- */
-initAuth(() => {
-    initPage();
+initAuth(async () => {
+    await initPage();
 });

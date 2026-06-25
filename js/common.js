@@ -187,17 +187,18 @@ export function initAuth(onReady) {
                 currentUsername = null;
             }
 
-            // Уведомляем подписчиков
-            notifyAuthChange();
-
-            // Вызываем колбэк готовности, если передан
+            // Сначала вызываем колбэк готовности — он создаёт DOM-структуру страницы
+            // Важно: дожидаемся его завершения, чтобы DOM был готов для обновления навигации
             if (typeof onReady === 'function') {
                 try {
-                    onReady(currentUser, currentUserRole, currentUsername);
+                    await Promise.resolve(onReady(currentUser, currentUserRole, currentUsername));
                 } catch (err) {
                     console.error('Ошибка в onReady колбэке:', err.message);
                 }
             }
+
+            // Затем уведомляем подписчиков (навигация и другие компоненты)
+            notifyAuthChange();
         });
     } catch (error) {
         console.error('Ошибка инициализации аутентификации:', error.message);

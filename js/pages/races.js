@@ -250,6 +250,6 @@ function renderRaces(container) {
 }
 
 /* ------- Запуск страницы ------- */
-initAuth(() => {
-    initPage();
+initAuth(async () => {
+    await initPage();
 });

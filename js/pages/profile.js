@@ -306,6 +306,6 @@ async function loadCharacters() {
 }
 
 /* ------- Запуск страницы ------- */
-initAuth(() => {
-    initPage();
+initAuth(async () => {
+    await initPage();
 });

@@ -6,7 +6,8 @@
 
 import {
     currentUser, currentUserRole, currentUsername, appSettings,
-    getAvatarUrl, getRoleName, getRoleIcon, logout, isMasterOrAdmin
+    getAvatarUrl, getRoleName, getRoleIcon, logout, isMasterOrAdmin,
+    onAuthChange
 } from './common.js';
 
 /* ======================================================================
@@ -120,6 +121,15 @@ export function createNavigation() {
     );
 
     nav.appendChild(container);
+
+    // Регистрируем обновление навигации при изменении статуса авторизации
+    onAuthChange(() => {
+        updateNavigationUI();
+    });
+
+    // Отложенный вызов для начальной отрисовки (если DOM уже готов)
+    setTimeout(() => updateNavigationUI(), 0);
+
     return nav;
 }
 

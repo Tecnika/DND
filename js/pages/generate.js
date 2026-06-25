@@ -241,6 +241,6 @@ async function saveCharacter() {
 }
 
 /* ------- Запуск страницы ------- */
-initAuth(() => {
-    initPage();
+initAuth(async () => {
+    await initPage();
 });

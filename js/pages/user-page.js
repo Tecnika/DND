@@ -235,6 +235,6 @@ async function loadPublicCharacters(userId) {
 }
 
 /* ------- Запуск страницы ------- */
-initAuth(() => {
-    initPage();
+initAuth(async () => {
+    await initPage();
 });

@@ -215,14 +215,27 @@ function renderNews(snapshot, container) {
             meta.appendChild(el('span', {}, ' • '));
         }
 
-        // Дата создания
-        const dateText = news.createdAt ? formatDate(news.createdAt.toDate()) : 'Дата неизвестна';
+        // Дата создания (может быть Timestamp, Date или строка)
+        let dateValue = 'Дата неизвестна';
+        if (news.createdAt) {
+            try {
+                if (typeof news.createdAt.toDate === 'function') {
+                    dateValue = formatDate(news.createdAt.toDate());
+                } else if (news.createdAt instanceof Date) {
+                    dateValue = formatDate(news.createdAt);
+                } else if (typeof news.createdAt === 'string' || typeof news.createdAt === 'number') {
+                    dateValue = formatDate(news.createdAt);
+                }
+            } catch (e) {
+                dateValue = 'Дата неизвестна';
+            }
+        }
         meta.appendChild(el('span', {}, dateText));
 
         card.appendChild(meta);
 
         // Краткий текст (обрезаем до 200 символов)
-        const fullText = news.text || '';
+        const fullText = typeof news.text === 'string' ? news.text : '';
         const shortText = fullText.length > 200
             ? fullText.substring(0, 200) + '...'
             : fullText;
@@ -264,6 +277,6 @@ function renderNews(snapshot, container) {
 /* ------- Запуск страницы ------- */
 
 // Инициализируем аутентификацию, затем загружаем страницу
-initAuth(() => {
-    initPage();
+initAuth(async () => {
+    await initPage();
 });
